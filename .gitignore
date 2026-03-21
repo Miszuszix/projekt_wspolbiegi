@@ -58,6 +58,8 @@ Generated\ Files/
 TestResult.xml
 nunit-*.xml
 
+*.idea
+
 # Approval Tests result files
 *.received.*
 
