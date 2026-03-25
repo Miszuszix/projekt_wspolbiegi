@@ -37,6 +37,7 @@ namespace TP.ConcurrentProgramming.Communication.Test
           eventsExchange.GetEvent();
           isWaiting = false;
         });
+        newThread.IsBackground = true;
         // Act
         newThread.Start();
         Thread.Sleep(500);

@@ -22,6 +22,7 @@ namespace TP.ConcurrentProgramming.CommonDataConsistency
         public RecordBasedConsistency()
         {
             Thread thread = new Thread(Worker);
+            thread.IsBackground = true;
             thread.Start();
         }
 
