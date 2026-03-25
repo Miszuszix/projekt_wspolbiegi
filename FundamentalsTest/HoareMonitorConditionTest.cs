@@ -48,6 +48,7 @@ namespace TP.ConcurrentProgramming.Fundamentals.Test
             hoareMonitorFixture.WauitICondition();
           }
         );
+        additionalthreads.IsBackground = true;
         additionalthreads.Start();
         Thread.Sleep(500);
         hoareMonitorFixture.IsConsistent(x => result = x);
@@ -103,6 +104,7 @@ namespace TP.ConcurrentProgramming.Fundamentals.Test
             hoareMonitorFixture.WauitICondition();
           }
         );
+        additionalthreads.IsBackground = true;
         additionalthreads.Start();
         Thread.Sleep(500);
         hoareMonitorFixture.IsConsistent(x => result &= x);

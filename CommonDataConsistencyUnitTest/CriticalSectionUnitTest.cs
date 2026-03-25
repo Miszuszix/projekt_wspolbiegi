@@ -93,11 +93,22 @@ namespace TP.ConcurrentProgramming.CommonDataConsistency.UnitTest
 
         private void RunThreadsUsingThreadPool(WaitCallback callBack)
         {
-            for (int i = 0; i < 2; i++)
-                ThreadPool.QueueUserWorkItem(callBack);
-            //wait for threads
-            //TODO must be improved it could cause race condition
-            Thread.Sleep(1000);
+            if (callBack == null)
+                throw new ArgumentNullException(nameof(callBack));
+
+            using (CountdownEvent countdown = new CountdownEvent(2))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    ThreadPool.QueueUserWorkItem(state => 
+                    {
+                        callBack(null);
+                        countdown.Signal();
+                    });
+                }
+
+                countdown.Wait();
+            }
         }
 
         private void RunThreadsUsingTask(WaitCallback callBack)
