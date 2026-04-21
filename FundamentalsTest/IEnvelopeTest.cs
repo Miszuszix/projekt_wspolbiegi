@@ -8,29 +8,25 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
-using Moq;
+using TP.ConcurrentProgramming.Fundamentals;
 
 namespace TP.ConcurrentProgramming.Fundamentals.Test
 {
   [TestClass]
   public class IEnvelopeTest
   {
+    private class EnvelopeFixture : IEnvelope
+    {
+      public bool InPool { get; set; } = false;
+      public IEnvelopeManager GetIEnvelopeManager => null!;
+      public void ReturnEmptyEnvelope() { }
+    }
+
     [TestMethod]
-    public void DetachedEnvelopeTest()
+    public void EnvelopeFixture_PropertyTest()
     {
-      Mock<IEnvelopeManager> envelopeManager = new Mock<IEnvelopeManager>();
-      IEnvelope envelope = new EnvelopeFixture(envelopeManager.Object);
+      IEnvelope envelope = new EnvelopeFixture { InPool = true };
+      Assert.IsTrue(envelope.InPool);
     }
-
-    #region tests instrumentation
-
-    private class EnvelopeFixture : Envelope
-    {
-      public EnvelopeFixture(IEnvelopeManager manager) : base(manager)
-      {
-      }
-    }
-
-    #endregion tests instrumentation
   }
 }

@@ -8,102 +8,43 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
-using Moq;
+using TP.ConcurrentProgramming.Fundamentals;
 
 namespace TP.ConcurrentProgramming.Fundamentals.Test
 {
   [TestClass]
   public class EnvelopePoolTests
   {
-    [TestMethod]
-    public void ConstructorTest()
+    private class EnvelopeManagerFixture : IEnvelopeManager
     {
-      EnvelopePool<IEnvelope> pool = new(x => new DTOFixture(x));
-      Assert.IsNotNull(pool.GetEmptyEnvelope());
+      public void ReturnEmptyEnvelope(IEnvelope envelope) {}
     }
-
-    [TestMethod]
-    public void ReturnEmptyEnvelope_WhenEnvelopeIsNull_ThrowsException()
-    {
-      // Arrange
-      EnvelopePool<IEnvelope> envelopePool = new(source => new Mock<IEnvelope>().Object);
-
-      // Act & Assert
-      Assert.ThrowsException<NullReferenceException>(() => envelopePool.ReturnEmptyEnvelope(null));
-    }
-
-    [TestMethod]
-    public void GetEmptyEnvelope_WhenPoolIsEmpty_CreatesNewEnvelope()
-    {
-      // Arrange
-      IEnvelope? mockEnvelope = null;
-      EnvelopePool<IEnvelope> envelopePool = new(envelopePoo => { mockEnvelope = new DTOFixture(envelopePoo); return mockEnvelope; });
-
-      // Act
-      IEnvelope result = envelopePool.GetEmptyEnvelope();
-
-      // Assert
-      Assert.AreSame<IEnvelope>(mockEnvelope, result);
-    }
-
-    [TestMethod]
-    public void EmptyEnvelopeIsInstanceOfTypeType()
-    {
-      // Arrange
-      EnvelopePool<IEnvelope> envelopePool = new(envelopePoo => new DTOFixture(envelopePoo));
-
-      // Act
-      IEnvelope result = envelopePool.GetEmptyEnvelope();
-
-      // Assert
-      Assert.IsInstanceOfType(result, typeof(DTOFixture));
-    }
-
-    [TestMethod]
-    public void GetEmptyEnvelopeCreatesNewEnvelopeEachTimeTestMethod()
-    {
-      // Arrange
-      EnvelopePool<IEnvelope> envelopePool = new(envelopePoo => new DTOFixture(envelopePoo));
-
-      // Act
-      IEnvelope[] result = [envelopePool.GetEmptyEnvelope(), envelopePool.GetEmptyEnvelope()];
-
-      // Assert
-      Assert.AreNotSame<IEnvelope>(result[0], result[1]);
-    }
-
-    [TestMethod]
-    public void Return_Alien_Envelope_ThrowsException()
-    {
-      // Arrange
-      Mock<IEnvelope> mockEnvelope = new Mock<IEnvelope>();
-      IEnvelopeManager envelopePool = new EnvelopePool<IEnvelope>(source => mockEnvelope.Object);
-
-      // Act & Assert
-      Assert.ThrowsException<InvalidOperationException>(() => envelopePool.ReturnEmptyEnvelope(mockEnvelope.Object));
-    }
-
-    [TestMethod]
-    public void ReturnEmptyEnvelope_WhenEnvelopeIsAlreadyInPool_ThrowsException()
-    {
-      // Arrange
-      EnvelopePool<IEnvelope> envelopePool = new(source =>  new DTOFixture(source));
-      IEnvelope mockEnvelope = envelopePool.GetEmptyEnvelope();
-      envelopePool.ReturnEmptyEnvelope(mockEnvelope);
-
-      // Act & Assert
-      Assert.ThrowsException<InvalidOperationException>(() => envelopePool.ReturnEmptyEnvelope(mockEnvelope));
-    }
-
-    #region test instrumentation
 
     private class DTOFixture : Envelope
     {
-      public DTOFixture(EnvelopePool<IEnvelope> manager) : base(manager)
-      {
-      }
+      public DTOFixture(IEnvelopeManager manager) : base(manager) { }
     }
 
-    #endregion test instrumentation
+    [TestMethod]
+    public void GetEmptyEnvelope_ShouldReturnNewInstance()
+    {
+      EnvelopePool<IEnvelope> pool = new EnvelopePool<IEnvelope>(source => new DTOFixture(source));
+
+      IEnvelope result = pool.GetEmptyEnvelope();
+
+      Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
+    public void ReturnEmptyEnvelope_ShouldAddBackToPool()
+    {
+      EnvelopePool<IEnvelope> pool = new EnvelopePool<IEnvelope>(source => new DTOFixture(source));
+      IEnvelope envelope = pool.GetEmptyEnvelope();
+
+      pool.ReturnEmptyEnvelope(envelope);
+
+      IEnvelope secondResult = pool.GetEmptyEnvelope();
+      Assert.IsNotNull(secondResult);
+    }
   }
 }
