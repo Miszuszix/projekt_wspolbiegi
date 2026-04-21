@@ -21,11 +21,27 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     public MainWindowViewModel() : this(null)
     { }
+    private int _numberOfBalls = 5;
+    public int NumberOfBalls
+    {
+      get => _numberOfBalls;
+      set
+      {
+        if (_numberOfBalls != value)
+        {
+          _numberOfBalls = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    public System.Windows.Input.ICommand StartCommand { get; }
 
     internal MainWindowViewModel(ModelAbstractApi modelLayerAPI)
     {
       ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
       Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
+      StartCommand = new RelayCommand(() => Start(NumberOfBalls));
     }
 
     #endregion ctor

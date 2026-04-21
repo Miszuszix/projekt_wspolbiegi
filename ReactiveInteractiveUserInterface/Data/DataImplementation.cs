@@ -15,16 +15,14 @@ namespace TP.ConcurrentProgramming.Data
 {
   internal class DataImplementation : DataAbstractAPI
   {
-    #region ctor
+    internal const double BoardWidth = 400.0;
+    internal const double BoardHeight = 400.0;
+    internal const double BallRadius = 10.0;
 
     public DataImplementation()
     {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
+      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(30));
     }
-
-    #endregion ctor
-
-    #region DataAbstractAPI
 
     public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
     {
@@ -32,19 +30,23 @@ namespace TP.ConcurrentProgramming.Data
         throw new ObjectDisposedException(nameof(DataImplementation));
       if (upperLayerHandler == null)
         throw new ArgumentNullException(nameof(upperLayerHandler));
+        
+      BallsList.Clear();
       Random random = new Random();
+      
       for (int i = 0; i < numberOfBalls; i++)
       {
-        Vector startingPosition = new(random.Next(100, 400 - 100), random.Next(100, 400 - 100));
-        Ball newBall = new(startingPosition, startingPosition);
+        Vector startingPosition = new(
+            random.Next((int)BallRadius, (int)(BoardWidth - BallRadius)), 
+            random.Next((int)BallRadius, (int)(BoardHeight - BallRadius))
+        );
+        Vector startingVelocity = new((random.NextDouble() - 0.5) * 10, (random.NextDouble() - 0.5) * 10);
+        
+        Ball newBall = new(startingPosition, startingVelocity);
         upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }
     }
-
-    #endregion DataAbstractAPI
-
-    #region IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
@@ -63,31 +65,19 @@ namespace TP.ConcurrentProgramming.Data
 
     public override void Dispose()
     {
-      // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
       Dispose(disposing: true);
       GC.SuppressFinalize(this);
     }
 
-    #endregion IDisposable
-
-    #region private
-
-    //private bool disposedValue;
     private bool Disposed = false;
-
     private readonly Timer MoveTimer;
-    private Random RandomGenerator = new();
     private List<Ball> BallsList = [];
 
     private void Move(object? x)
     {
       foreach (Ball item in BallsList)
-        item.Move(new Vector((RandomGenerator.NextDouble() - 0.5) * 10, (RandomGenerator.NextDouble() - 0.5) * 10));
+        item.Move(BoardWidth, BoardHeight, BallRadius);
     }
-
-    #endregion private
-
-    #region TestingInfrastructure
 
     [Conditional("DEBUG")]
     internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)
@@ -106,7 +96,5 @@ namespace TP.ConcurrentProgramming.Data
     {
       returnInstanceDisposed(Disposed);
     }
-
-    #endregion TestingInfrastructure
   }
 }

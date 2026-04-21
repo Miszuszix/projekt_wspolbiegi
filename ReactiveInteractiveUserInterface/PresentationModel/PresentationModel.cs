@@ -1,13 +1,4 @@
-﻿//____________________________________________________________________________________________________________________________________
-//
-//  Copyright (C) 2024, Mariusz Postol LODZ POLAND.
-//
-//  To be in touch join the community by pressing the `Watch` button and get started commenting using the discussion panel at
-//
-//  https://github.com/mpostol/TP/discussions/182
-//_____________________________________________________________________________________________________________________________________
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -15,9 +6,6 @@ using UnderneathLayerAPI = TP.ConcurrentProgramming.BusinessLogic.BusinessLogicA
 
 namespace TP.ConcurrentProgramming.Presentation.Model
 {
-  /// <summary>
-  /// Class Model - implements the <see cref="ModelAbstractApi" />
-  /// </summary>
   internal class ModelImplementation : ModelAbstractApi
   {
     internal ModelImplementation() : this(null)
@@ -65,8 +53,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     private void StartHandler(BusinessLogic.IPosition position, BusinessLogic.IBall ball)
     {
-      ModelBall newBall = new ModelBall(position.x, position.y, ball) { Diameter = 20.0 };
-      BallChanged.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
+      ModelBall newBall = new ModelBall(position.x, position.y, 10.0, ball);
+      
+      BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
     }
 
     #endregion private
