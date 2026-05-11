@@ -8,7 +8,6 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
-using System;
 using System.Diagnostics;
 
 namespace TP.ConcurrentProgramming.Data
@@ -18,12 +17,7 @@ namespace TP.ConcurrentProgramming.Data
     internal const double BoardWidth = 400.0;
     internal const double BoardHeight = 400.0;
     internal const double BallRadius = 10.0;
-
-    public DataImplementation()
-    {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(30));
-    }
-
+    
     public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
     {
       if (Disposed)
@@ -42,9 +36,11 @@ namespace TP.ConcurrentProgramming.Data
         );
         Vector startingVelocity = new((random.NextDouble() - 0.5) * 10, (random.NextDouble() - 0.5) * 10);
         
-        Ball newBall = new(startingPosition, startingVelocity);
+        Ball newBall = new(startingPosition, startingVelocity, BoardWidth, BoardHeight, BallRadius);
         upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
+        
+        newBall.StartMoving();
       }
     }
 
@@ -54,7 +50,10 @@ namespace TP.ConcurrentProgramming.Data
       {
         if (disposing)
         {
-          MoveTimer.Dispose();
+          foreach (var ball in BallsList)
+          {
+              ball.Dispose();
+          }
           BallsList.Clear();
         }
         Disposed = true;
@@ -70,14 +69,7 @@ namespace TP.ConcurrentProgramming.Data
     }
 
     private bool Disposed = false;
-    private readonly Timer MoveTimer;
     private List<Ball> BallsList = [];
-
-    private void Move(object? x)
-    {
-      foreach (Ball item in BallsList)
-        item.Move(BoardWidth, BoardHeight, BallRadius);
-    }
 
     [Conditional("DEBUG")]
     internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)

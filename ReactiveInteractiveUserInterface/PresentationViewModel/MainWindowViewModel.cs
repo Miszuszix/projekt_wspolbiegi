@@ -21,8 +21,8 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     public MainWindowViewModel() : this(null)
     { }
-    private int _numberOfBalls = 5;
-    public int NumberOfBalls
+    private string _numberOfBalls = "5";
+    public string NumberOfBalls
     {
       get => _numberOfBalls;
       set
@@ -41,7 +41,13 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
     {
       ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
       Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
-      StartCommand = new RelayCommand(() => Start(NumberOfBalls));
+      StartCommand = new RelayCommand(() =>
+      {
+        if (int.TryParse(NumberOfBalls, out int numberOfBalls) && numberOfBalls > 0)
+        {
+          Start(numberOfBalls);
+        }
+      });
     }
 
     #endregion ctor

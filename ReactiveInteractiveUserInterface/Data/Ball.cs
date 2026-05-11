@@ -10,47 +10,69 @@
 
 namespace TP.ConcurrentProgramming.Data
 {
-  internal class Ball : IBall
+  internal class Ball : IBall, IDisposable
   {
-    internal Ball(Vector initialPosition, Vector initialVelocity)
+    private bool _isDisposed = false;
+    private Vector _position;
+    private double _boardWidth;
+    private double _boardHeight;
+    private double _radius;
+
+    internal Ball(Vector initialPosition, Vector initialVelocity, double boardWidth, double boardHeight, double radius)
     {
-      Position = initialPosition;
+      _position = initialPosition;
       Velocity = initialVelocity;
+      _boardWidth = boardWidth;
+      _boardHeight = boardHeight;
+      _radius = radius;
     }
 
     public event EventHandler<IVector>? NewPositionNotification;
 
     public IVector Velocity { get; set; }
 
-    private Vector Position;
-
     private void RaiseNewPositionChangeNotification()
     {
-      NewPositionNotification?.Invoke(this, Position);
+      NewPositionNotification?.Invoke(this, _position);
     }
 
-    internal void Move(double boardWidth, double boardHeight, double radius)
+    internal void StartMoving()
     {
-      double newX = Position.x + Velocity.x;
-      double newY = Position.y + Velocity.y;
+      Task.Run(async () =>
+      {
+        while (!_isDisposed)
+        {
+          Move();
+          await Task.Delay(30);
+        }
+      });
+    }
+
+    internal void Move()
+    {
+      double newX = _position.x + Velocity.x;
+      double newY = _position.y + Velocity.y;
       double newVX = Velocity.x;
       double newVY = Velocity.y;
 
-      if (newX <= radius || newX >= boardWidth - radius)
+      if ((newX <= _radius && newVX < 0) || (newX >= _boardWidth - _radius && newVX > 0))
       {
         newVX = -newVX;
-        newX = newX <= radius ? radius : boardWidth - radius;
       }
-      
-      if (newY <= radius || newY >= boardHeight - radius)
+
+      if ((newY <= _radius && newVY < 0) || (newY >= _boardHeight - _radius && newVY > 0))
       {
         newVY = -newVY;
-        newY = newY <= radius ? radius : boardHeight - radius;
       }
 
       Velocity = new Vector(newVX, newVY);
-      Position = new Vector(newX, newY);
+      _position = new Vector(newX, newY);
       RaiseNewPositionChangeNotification();
+    }
+
+    public void Dispose()
+    {
+      _isDisposed = true;
     }
   }
 }
