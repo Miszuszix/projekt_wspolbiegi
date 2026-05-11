@@ -8,115 +8,120 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using TP.ConcurrentProgramming.BusinessLogic;
 using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic.Test
 {
+  internal class MockVector : Data.IVector
+  {
+    public double x { get; init; }
+    public double y { get; init; }
+    
+    public MockVector(double x, double y)
+    {
+      this.x = x;
+      this.y = y;
+    }
+  }
+
+  internal class MockBall : Data.IBall
+  {
+    public event EventHandler<Data.IVector>? NewPositionNotification;
+    public Data.IVector Velocity { get; set; }
+    public Data.IVector Position { get; set; }
+
+    public MockBall(double x, double y, double vx, double vy)
+    {
+      Position = new MockVector(x, y);
+      Velocity = new MockVector(vx, vy);
+    }
+
+    public void SimulateMovement(double newX, double newY)
+    {
+      Position = new MockVector(newX, newY);
+      NewPositionNotification?.Invoke(this, Position);
+    }
+
+    public void Dispose() { }
+  }
+
+  internal class MockDataAPI : DataAbstractAPI
+  {
+    public List<MockBall> Balls = new List<MockBall>();
+
+    public override void Start(int numberOfBalls, Action<Data.IVector, Data.IBall> upperLayerHandler)
+    {
+      foreach (var ball in Balls)
+      {
+        upperLayerHandler(ball.Position, ball);
+      }
+    }
+
+    public override void Dispose() { }
+  }
+
   [TestClass]
-  public class BusinessLogicImplementationUnitTest
+  public class BusinessLogicUnitTest
   {
     [TestMethod]
-    public void ConstructorTestMethod()
+    public void DetectCollisions_StandardCollisionTest()
     {
-      using (BusinessLogicImplementation newInstance = new(new DataLayerConstructorFixcure()))
-      {
-        bool newInstanceDisposed = true;
-        newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
-        Assert.IsFalse(newInstanceDisposed);
-      }
+      var mockApi = new MockDataAPI();
+      var ball1 = new MockBall(10, 10, 5, 0);
+      var ball2 = new MockBall(30, 10, -5, 0);
+      mockApi.Balls.Add(ball1);
+      mockApi.Balls.Add(ball2);
+
+      var logicApi = new BusinessLogicImplementation(mockApi);
+      logicApi.Start(2, (pos, ball) => { });
+
+      ball1.SimulateMovement(15, 10);
+      ball2.SimulateMovement(25, 10);
+
+      Assert.IsTrue(ball1.Velocity.x < 0);
+      Assert.IsTrue(ball2.Velocity.x > 0);
     }
 
     [TestMethod]
-    public void DisposeTestMethod()
+    public void DetectCollisions_GhostCollisionTest()
     {
-      DataLayerDisposeFixcure dataLayerFixcure = new DataLayerDisposeFixcure();
-      BusinessLogicImplementation newInstance = new(dataLayerFixcure);
-      Assert.IsFalse(dataLayerFixcure.Disposed);
-      bool newInstanceDisposed = true;
-      newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
-      Assert.IsFalse(newInstanceDisposed);
-      newInstance.Dispose();
-      newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
-      Assert.IsTrue(newInstanceDisposed);
-      Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Dispose());
-      Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Start(0, (position, ball) => { }));
-      Assert.IsTrue(dataLayerFixcure.Disposed);
+      var mockApi = new MockDataAPI();
+      var ball1 = new MockBall(15, 10, -5, 0);
+      var ball2 = new MockBall(25, 10, 5, 0);
+      mockApi.Balls.Add(ball1);
+      mockApi.Balls.Add(ball2);
+
+      var logicApi = new BusinessLogicImplementation(mockApi);
+      logicApi.Start(2, (pos, ball) => { });
+
+      ball1.SimulateMovement(15, 10);
+
+      Assert.AreEqual(-5, ball1.Velocity.x);
+      Assert.AreEqual(5, ball2.Velocity.x);
     }
 
     [TestMethod]
-    public void StartTestMethod()
+    public void DetectCollisions_ThreeBallsCollisionTest()
     {
-      DataLayerStartFixcure dataLayerFixcure = new();
-      using (BusinessLogicImplementation newInstance = new(dataLayerFixcure))
-      {
-        int called = 0;
-        int numberOfBalls2Create = 10;
-        newInstance.Start(
-          numberOfBalls2Create,
-          (startingPosition, ball) => { called++; Assert.IsNotNull(startingPosition); Assert.IsNotNull(ball); });
-        Assert.AreEqual<int>(1, called);
-        Assert.IsTrue(dataLayerFixcure.StartCalled);
-        Assert.AreEqual<int>(numberOfBalls2Create, dataLayerFixcure.NumberOfBallseCreated);
-      }
+      var mockApi = new MockDataAPI();
+      var ball1 = new MockBall(20, 20, 5, 5);
+      var ball2 = new MockBall(30, 20, -5, 5);
+      var ball3 = new MockBall(20, 30, 5, -5);
+      mockApi.Balls.Add(ball1);
+      mockApi.Balls.Add(ball2);
+      mockApi.Balls.Add(ball3);
+
+      var logicApi = new BusinessLogicImplementation(mockApi);
+      logicApi.Start(3, (pos, ball) => { });
+
+      ball1.SimulateMovement(20, 20);
+
+      Assert.AreNotEqual(5, ball1.Velocity.x);
+      Assert.AreNotEqual(5, ball1.Velocity.y);
     }
-
-    #region testing instrumentation
-
-    private class DataLayerConstructorFixcure : Data.DataAbstractAPI
-    {
-      public override void Dispose()
-      { }
-
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    private class DataLayerDisposeFixcure : Data.DataAbstractAPI
-    {
-      internal bool Disposed = false;
-
-      public override void Dispose()
-      {
-        Disposed = true;
-      }
-
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    private class DataLayerStartFixcure : Data.DataAbstractAPI
-    {
-      internal bool StartCalled = false;
-      internal int NumberOfBallseCreated = -1;
-
-      public override void Dispose()
-      { }
-
-      public override void Start(int numberOfBalls, Action<IVector, Data.IBall> upperLayerHandler)
-      {
-        StartCalled = true;
-        NumberOfBallseCreated = numberOfBalls;
-        upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
-      }
-
-      private record DataVectorFixture : Data.IVector
-      {
-        public double x { get; init; }
-        public double y { get; init; }
-      }
-
-      private class DataBallFixture : Data.IBall
-      {
-        public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public event EventHandler<IVector>? NewPositionNotification = null;
-      }
-    }
-
-    #endregion testing instrumentation
   }
 }

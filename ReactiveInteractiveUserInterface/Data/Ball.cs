@@ -30,6 +30,7 @@ namespace TP.ConcurrentProgramming.Data
     public event EventHandler<IVector>? NewPositionNotification;
 
     public IVector Velocity { get; set; }
+    public IVector Position => _position;
 
     private void RaiseNewPositionChangeNotification()
     {
@@ -43,7 +44,7 @@ namespace TP.ConcurrentProgramming.Data
         while (!_isDisposed)
         {
           Move();
-          await Task.Delay(30);
+          await Task.Delay(10);
         }
       });
     }

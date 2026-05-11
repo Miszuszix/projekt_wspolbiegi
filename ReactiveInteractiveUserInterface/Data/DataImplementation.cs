@@ -31,16 +31,19 @@ namespace TP.ConcurrentProgramming.Data
       for (int i = 0; i < numberOfBalls; i++)
       {
         Vector startingPosition = new(
-            random.Next((int)BallRadius, (int)(BoardWidth - BallRadius)), 
-            random.Next((int)BallRadius, (int)(BoardHeight - BallRadius))
+          random.Next((int)BallRadius, (int)(BoardWidth - BallRadius)), 
+          random.Next((int)BallRadius, (int)(BoardHeight - BallRadius))
         );
-        Vector startingVelocity = new((random.NextDouble() - 0.5) * 10, (random.NextDouble() - 0.5) * 10);
+        Vector startingVelocity = new((random.NextDouble() - 0.5) * 3, (random.NextDouble() - 0.5) * 3);
         
         Ball newBall = new(startingPosition, startingVelocity, BoardWidth, BoardHeight, BallRadius);
         upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
-        
-        newBall.StartMoving();
+      }
+
+      foreach (var ball in BallsList)
+      {
+        ball.StartMoving();
       }
     }
 
