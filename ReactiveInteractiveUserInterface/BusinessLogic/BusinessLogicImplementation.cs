@@ -33,6 +33,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     private readonly UnderneathLayerAPI layerBellow;
     private readonly List<DataBall> _balls = new List<DataBall>();
 
+    private readonly object _collisionLock = new object();
+
     public BusinessLogicImplementation() : this(null) { }
 
     internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
@@ -100,8 +102,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double newVx2 = v2.x - collisionScale * -dx;
             double newVy2 = v2.y - collisionScale * -dy;
 
-            currentBall.Velocity = new VectorWrapper(newVx1, newVy1);
-            otherBall.Velocity = new VectorWrapper(newVx2, newVy2);
+            lock (_collisionLock)
+            {
+              currentBall.Velocity = new VectorWrapper(newVx1, newVy1);
+              otherBall.Velocity = new VectorWrapper(newVx2, newVy2);
+            }
           }
         }
       }
