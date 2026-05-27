@@ -51,23 +51,27 @@ namespace TP.ConcurrentProgramming.Data
 
     internal void Move()
     {
-      double newX = _position.x + Velocity.x;
-      double newY = _position.y + Velocity.y;
-      double newVX = Velocity.x;
-      double newVY = Velocity.y;
-
-      if ((newX <= _radius && newVX < 0) || (newX >= _boardWidth - _radius && newVX > 0))
+      lock (this)
       {
-        newVX = -newVX;
+        double newX = _position.x + Velocity.x;
+        double newY = _position.y + Velocity.y;
+        double newVX = Velocity.x;
+        double newVY = Velocity.y;
+
+        if ((newX <= _radius && newVX < 0) || (newX >= _boardWidth - _radius && newVX > 0))
+        {
+          newVX = -newVX;
+        }
+
+        if ((newY <= _radius && newVY < 0) || (newY >= _boardHeight - _radius && newVY > 0))
+        {
+          newVY = -newVY;
+        }
+
+        Velocity = new Vector(newVX, newVY);
+        _position = new Vector(newX, newY);
       }
 
-      if ((newY <= _radius && newVY < 0) || (newY >= _boardHeight - _radius && newVY > 0))
-      {
-        newVY = -newVY;
-      }
-
-      Velocity = new Vector(newVX, newVY);
-      _position = new Vector(newX, newY);
       RaiseNewPositionChangeNotification();
     }
 

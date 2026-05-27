@@ -84,28 +84,31 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         if (distance <= 20)
         {
-          DataVector v1 = currentBall.Velocity;
-          DataVector v2 = otherBall.Velocity;
-
-          double vx = v1.x - v2.x;
-          double vy = v1.y - v2.y;
-
-          double dotProduct = (dx * vx) + (dy * vy);
-
-          if (dotProduct < 0)
+          lock (currentBall)
           {
-            double collisionScale = dotProduct / distanceSquared;
-
-            double newVx1 = v1.x - collisionScale * dx;
-            double newVy1 = v1.y - collisionScale * dy;
-
-            double newVx2 = v2.x - collisionScale * -dx;
-            double newVy2 = v2.y - collisionScale * -dy;
-
-            lock (_collisionLock)
+            lock (otherBall)
             {
-              currentBall.Velocity = new VectorWrapper(newVx1, newVy1);
-              otherBall.Velocity = new VectorWrapper(newVx2, newVy2);
+              DataVector v1 = currentBall.Velocity;
+              DataVector v2 = otherBall.Velocity;
+
+              double vx = v1.x - v2.x;
+              double vy = v1.y - v2.y;
+
+              double dotProduct = (dx * vx) + (dy * vy);
+
+              if (dotProduct < 0)
+              {
+                double collisionScale = dotProduct / distanceSquared;
+
+                double newVx1 = v1.x - collisionScale * dx;
+                double newVy1 = v1.y - collisionScale * dy;
+
+                double newVx2 = v2.x - collisionScale * -dx;
+                double newVy2 = v2.y - collisionScale * -dy;
+
+                currentBall.Velocity = new VectorWrapper(newVx1, newVy1);
+                otherBall.Velocity = new VectorWrapper(newVx2, newVy2);
+              }
             }
           }
         }
