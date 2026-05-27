@@ -27,7 +27,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     #region testing instrumentation
 
     private class DataBallFixture : Data.IBall
+
     {
+      public object BallLock { get; } = new object();
       public Data.IVector Position { get; set; } = new VectorFixture(0.0, 0.0);
 
       public Data.IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

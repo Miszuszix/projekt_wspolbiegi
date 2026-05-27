@@ -17,6 +17,11 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       eventObservable = Observable.FromEventPattern<BallChaneEventArgs>(this, "BallChanged");
     }
 
+    public override void MoveInteractiveBall(double x, double y)
+    {
+      layerBellow.MoveInteractiveBall(x, y);
+    }
+
     #region ModelAbstractApi
 
     public override void Dispose()
@@ -87,4 +92,6 @@ namespace TP.ConcurrentProgramming.Presentation.Model
   {
     public IBall Ball { get; init; }
   }
+
+
 }

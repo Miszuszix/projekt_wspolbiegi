@@ -18,7 +18,7 @@
 
         <Viewbox Stretch="Uniform" Margin="10">
             <Border BorderBrush="Green" BorderThickness="4">
-                <ItemsControl ItemsSource="{Binding Balls}" Width="400" Height="400">
+                <ItemsControl ItemsSource="{Binding Balls}" Width="400" Height="400" Background="Transparent" PointerMoved="OnPointerMoved">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <Canvas ClipToBounds="True"/>

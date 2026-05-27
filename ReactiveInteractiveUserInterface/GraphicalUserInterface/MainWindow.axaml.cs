@@ -19,4 +19,19 @@ public partial class MainWindow : Window
         }
         base.OnClosed(e);
     }
+
+    private void OnPointerMoved(object? sender, Avalonia.Input.PointerEventArgs e)
+    {
+        var point = e.GetCurrentPoint(sender as Avalonia.Controls.Control);
+
+        if (point.Properties.IsLeftButtonPressed)
+        {
+            var position = point.Position;
+
+            if (DataContext is MainWindowViewModel vm)
+            {
+                vm.MoveInteractiveBall(position.X, position.Y);
+            }
+        }
+    }
 }

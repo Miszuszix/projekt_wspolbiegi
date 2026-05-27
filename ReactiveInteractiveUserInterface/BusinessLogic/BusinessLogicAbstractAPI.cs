@@ -12,6 +12,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 {
   public abstract class BusinessLogicAbstractAPI : IDisposable
   {
+    public abstract void MoveInteractiveBall(double x, double y);
     #region Layer Factory
 
     public static BusinessLogicAbstractAPI GetBusinessLogicLayer()

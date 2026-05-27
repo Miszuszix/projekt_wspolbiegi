@@ -33,8 +33,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     private readonly UnderneathLayerAPI layerBellow;
     private readonly List<DataBall> _balls = new List<DataBall>();
 
-    private readonly object _collisionLock = new object();
-
     public BusinessLogicImplementation() : this(null) { }
 
     internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
@@ -111,11 +109,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
                 currentBall.Velocity = new VectorWrapper(newVx1, newVy1);
                 otherBall.Velocity = new VectorWrapper(newVx2, newVy2);
+
+                layerBellow.LogData($"KOLIZJA: Kulka {currentBall.GetHashCode()} zglosila zderzenie z Kulka {otherBall.GetHashCode()}");
+                layerBellow.LogData($"KOLIZJA: Kulka {otherBall.GetHashCode()} zglosila zderzenie z Kulka {currentBall.GetHashCode()}");
               }
             }
           }
         }
       }
+    }
+
+    public override void MoveInteractiveBall(double x, double y)
+    {
+      layerBellow.MoveInteractiveBall(x, y);
     }
 
     [Conditional("DEBUG")]

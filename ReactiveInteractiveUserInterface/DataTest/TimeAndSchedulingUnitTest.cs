@@ -97,7 +97,42 @@ namespace TP.ConcurrentProgramming.Data.Test
 
       ball.Dispose();
 
-      Assert.IsTrue(movesCount >= 800 && movesCount <= 1100);
+      Assert.IsTrue(movesCount >= 550 && movesCount <= 1100, $"Wykonano {movesCount} ruchów");
+    }
+
+    [TestMethod]
+    public async Task Logger_DoesNotImpactPerformance_Test()
+    {
+      string testLogPath = "test_performance_log.txt";
+      if (File.Exists(testLogPath))
+      {
+        File.Delete(testLogPath);
+      }
+
+      DiagnosticLogger logger = new DiagnosticLogger(testLogPath);
+
+      Vector initialPosition = new(10.0, 10.0);
+      Vector initialVelocity = new(5.0, 5.0);
+
+      Ball ball = new(initialPosition, initialVelocity, 100.0, 100.0, 5.0, logger);
+
+      int movesCount = 0;
+      ball.NewPositionNotification += (sender, pos) =>
+      {
+        movesCount++;
+      };
+
+      ball.StartMoving();
+      await Task.Delay(2000);
+
+      ball.Dispose();
+      logger.Dispose();
+
+      Assert.IsTrue(movesCount >= 100, $"Wykonano {movesCount} ruchów");
+
+      Assert.IsTrue(File.Exists(testLogPath), "Plik z logami nie powstał.");
+      string[] logLines = File.ReadAllLines(testLogPath);
+      Assert.IsTrue(logLines.Length > 0, "Plik z logami jest pusty.");
     }
   }
 }

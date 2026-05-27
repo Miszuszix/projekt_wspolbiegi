@@ -12,6 +12,8 @@ namespace TP.ConcurrentProgramming.Data
 {
   public abstract class DataAbstractAPI : IDisposable
   {
+    public abstract void LogData(string message);
+    public abstract void MoveInteractiveBall(double x, double y);
     #region Layer Factory
 
     public static DataAbstractAPI GetDataLayer()

@@ -17,6 +17,8 @@ namespace TP.ConcurrentProgramming.Data
     internal const double BoardWidth = 400.0;
     internal const double BoardHeight = 400.0;
     internal const double BallRadius = 10.0;
+    private DiagnosticLogger? _logger;
+    private Ball? _interactiveBall;
     
     public override void Start(int numberOfBalls, Action<IVector, IBall> upperLayerHandler)
     {
@@ -26,8 +28,16 @@ namespace TP.ConcurrentProgramming.Data
         throw new ArgumentNullException(nameof(upperLayerHandler));
         
       BallsList.Clear();
+
+      _logger = new DiagnosticLogger("balls_diagnostic_log.txt");
+
       Random random = new Random();
-      
+
+      _interactiveBall = new Ball(new Vector(BoardWidth / 2, BoardHeight / 2), new Vector(0, 0), BoardWidth, BoardHeight, 15, _logger, true);
+      BallsList.Add(_interactiveBall);
+
+      _interactiveBall.NewPositionNotification += (sender, pos) => upperLayerHandler(pos, _interactiveBall);
+
       for (int i = 0; i < numberOfBalls; i++)
       {
         Vector startingPosition = new(
@@ -36,7 +46,7 @@ namespace TP.ConcurrentProgramming.Data
         );
         Vector startingVelocity = new((random.NextDouble() - 0.5) * 3, (random.NextDouble() - 0.5) * 3);
         
-        Ball newBall = new(startingPosition, startingVelocity, BoardWidth, BoardHeight, BallRadius);
+        Ball newBall = new(startingPosition, startingVelocity, BoardWidth, BoardHeight, BallRadius, _logger);
         upperLayerHandler(startingPosition, newBall);
         BallsList.Add(newBall);
       }
@@ -45,6 +55,11 @@ namespace TP.ConcurrentProgramming.Data
       {
         ball.StartMoving();
       }
+    }
+
+    public override void LogData(string message)
+    {
+      _logger?.Log(LogLevel.Info, message);
     }
 
     protected virtual void Dispose(bool disposing)
@@ -58,11 +73,19 @@ namespace TP.ConcurrentProgramming.Data
               ball.Dispose();
           }
           BallsList.Clear();
+
+          _logger?.Dispose();
+          _logger = null;
         }
         Disposed = true;
       }
       else
         throw new ObjectDisposedException(nameof(DataImplementation));
+    }
+
+    public override void MoveInteractiveBall(double x, double y)
+    {
+      _interactiveBall?.SetPosition(x, y);
     }
 
     public override void Dispose()

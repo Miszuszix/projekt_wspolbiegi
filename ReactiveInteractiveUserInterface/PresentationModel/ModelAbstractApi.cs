@@ -26,6 +26,8 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       return modelInstance.Value;
     }
 
+    public abstract void MoveInteractiveBall(double x, double y);
+
     public abstract void Start(int numberOfBalls);
 
     #region IObservable

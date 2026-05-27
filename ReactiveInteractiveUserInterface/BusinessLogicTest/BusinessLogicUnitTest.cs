@@ -34,6 +34,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     public Data.IVector Velocity { get; set; }
     public Data.IVector Position { get; set; }
 
+    public object BallLock { get; } = new object();
+
     public MockBall(double x, double y, double vx, double vy)
     {
       Position = new MockVector(x, y);
@@ -52,6 +54,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
   internal class MockDataAPI : DataAbstractAPI
   {
     public List<MockBall> Balls = new List<MockBall>();
+
+    public override void LogData(string message)
+    {
+    }
+    public override void MoveInteractiveBall(double x, double y)
+    {
+    }
 
     public override void Start(int numberOfBalls, Action<Data.IVector, Data.IBall> upperLayerHandler)
     {

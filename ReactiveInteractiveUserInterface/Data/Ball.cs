@@ -18,14 +18,18 @@ namespace TP.ConcurrentProgramming.Data
     private double _boardHeight;
     private double _radius;
     public object BallLock { get; } = new object();
+    private readonly ILogger? _logger;
+    private readonly bool _isInteractive;
 
-    internal Ball(Vector initialPosition, Vector initialVelocity, double boardWidth, double boardHeight, double radius)
+    internal Ball(Vector position, Vector velocity, double boardWidth, double boardHeight, double radius, ILogger? logger = null, bool isInteractive = false)
     {
-      _position = initialPosition;
-      Velocity = initialVelocity;
+      _position = position;
+      Velocity = velocity;
       _boardWidth = boardWidth;
       _boardHeight = boardHeight;
       _radius = radius;
+      _logger = logger;
+      _isInteractive = isInteractive;
     }
 
     public event EventHandler<IVector>? NewPositionNotification;
@@ -40,6 +44,7 @@ namespace TP.ConcurrentProgramming.Data
 
     internal void StartMoving()
     {
+      if (_isInteractive) return;
       Task.Run(async () =>
       {
         while (!_isDisposed)
@@ -72,6 +77,22 @@ namespace TP.ConcurrentProgramming.Data
         Velocity = new Vector(newVX, newVY);
         _position = new Vector(newX, newY);
       }
+
+      string logMessage = $"{this.GetHashCode()}; {_position.x:F2}; {_position.y:F2}; {Velocity.x:F2}; {Velocity.y:F2}";
+      _logger?.Log(LogLevel.Info, logMessage);
+
+      RaiseNewPositionChangeNotification();
+    }
+
+    internal void SetPosition(double x, double y)
+    {
+      lock (BallLock)
+      {
+        _position = new Vector(x, y);
+      }
+
+      string logMessage = $"GRACZ {this.GetHashCode()}; {_position.x:F2}; {_position.y:F2}; {Velocity.x:F2}; {Velocity.y:F2}";
+      _logger?.Log(LogLevel.Info, logMessage);
 
       RaiseNewPositionChangeNotification();
     }

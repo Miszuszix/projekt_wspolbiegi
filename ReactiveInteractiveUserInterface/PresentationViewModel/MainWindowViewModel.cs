@@ -62,6 +62,11 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       Observer.Dispose();
     }
 
+    public void MoveInteractiveBall(double x, double y)
+    {
+      ModelLayer.MoveInteractiveBall(x, y);
+    }
+
     public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
     #endregion public API
