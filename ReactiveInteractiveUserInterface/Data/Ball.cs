@@ -17,6 +17,7 @@ namespace TP.ConcurrentProgramming.Data
     private double _boardWidth;
     private double _boardHeight;
     private double _radius;
+    public object BallLock { get; } = new object();
 
     internal Ball(Vector initialPosition, Vector initialVelocity, double boardWidth, double boardHeight, double radius)
     {
@@ -51,7 +52,7 @@ namespace TP.ConcurrentProgramming.Data
 
     internal void Move()
     {
-      lock (this)
+      lock (BallLock)
       {
         double newX = _position.x + Velocity.x;
         double newY = _position.y + Velocity.y;

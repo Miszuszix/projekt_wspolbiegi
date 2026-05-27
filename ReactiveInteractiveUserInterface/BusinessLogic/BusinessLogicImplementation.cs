@@ -84,9 +84,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         if (distance <= 20)
         {
-          lock (currentBall)
+          object firstLock = currentBall.GetHashCode() < otherBall.GetHashCode() ? currentBall.BallLock : otherBall.BallLock;
+          object secondLock = currentBall.GetHashCode() < otherBall.GetHashCode() ? otherBall.BallLock : currentBall.BallLock;
+
+          lock (firstLock)
           {
-            lock (otherBall)
+            lock (secondLock)
             {
               DataVector v1 = currentBall.Velocity;
               DataVector v2 = otherBall.Velocity;

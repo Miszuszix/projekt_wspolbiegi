@@ -59,5 +59,7 @@ namespace TP.ConcurrentProgramming.Data
 
     IVector Velocity { get; set; }
     IVector Position { get; }
+
+    object BallLock { get; }
   }
 }
