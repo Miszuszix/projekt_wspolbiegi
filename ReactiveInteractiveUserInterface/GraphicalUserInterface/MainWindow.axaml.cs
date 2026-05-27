@@ -24,14 +24,11 @@ public partial class MainWindow : Window
     {
         var point = e.GetCurrentPoint(sender as Avalonia.Controls.Control);
 
-        if (point.Properties.IsLeftButtonPressed)
-        {
-            var position = point.Position;
+        var position = point.Position;
 
-            if (DataContext is MainWindowViewModel vm)
-            {
-                vm.MoveInteractiveBall(position.X, position.Y);
-            }
+        if (DataContext is MainWindowViewModel vm)
+        {
+            vm.MoveInteractiveBall(position.X, position.Y);
         }
     }
 }

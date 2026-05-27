@@ -36,7 +36,7 @@ namespace TP.ConcurrentProgramming.Data
       _interactiveBall = new Ball(new Vector(BoardWidth / 2, BoardHeight / 2), new Vector(0, 0), BoardWidth, BoardHeight, 15, _logger, true);
       BallsList.Add(_interactiveBall);
 
-      _interactiveBall.NewPositionNotification += (sender, pos) => upperLayerHandler(pos, _interactiveBall);
+      upperLayerHandler(new Vector(BoardWidth / 2, BoardHeight / 2), _interactiveBall);
 
       for (int i = 0; i < numberOfBalls; i++)
       {
